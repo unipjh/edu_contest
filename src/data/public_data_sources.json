@@ -1,0 +1,32 @@
+[
+  {
+    "id": "ncic-2022-standards",
+    "name": "NCIC 2022 개정 교육과정 성취기준",
+    "provider": "NCIC 국가교육과정정보센터",
+    "owner": "국가교육위원회·한국교육과정평가원",
+    "url": "https://ncic.re.kr",
+    "role": "primary-standard-index",
+    "collectionMethod": "NCIC 원문/인벤토리 다운로드 후 성취기준 패턴 추출",
+    "status": "selected"
+  },
+  {
+    "id": "keris-topic-learning-resources-standard",
+    "name": "전국초중등교과주제별학습자료표준데이터",
+    "provider": "한국교육학술정보원",
+    "owner": "교육부",
+    "url": "https://www.data.go.kr/data/15107733/standard.do",
+    "role": "public-learning-resource-links",
+    "collectionMethod": "공공데이터포털 CSV/JSON 다운로드 또는 자동 변환 API",
+    "status": "selected"
+  },
+  {
+    "id": "keris-edunet-topic-api",
+    "name": "한국교육학술정보원_주제별학습자료(에듀넷)",
+    "provider": "한국교육학술정보원",
+    "owner": "교육부",
+    "url": "https://www.data.go.kr/data/15058918/openapi.do",
+    "role": "optional-live-resource-lookup",
+    "collectionMethod": "공공데이터포털 활용신청 후 Edunet LINK API 호출",
+    "status": "fallback"
+  }
+]
