@@ -1,0 +1,33 @@
+# 환경변수 (민감 정보)
+.env
+.env.local
+
+# 빌드 아웃풋 & 의존성
+node_modules/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code 개인 설정
+.claude/
+AGENT.md
+
+# Playwright MCP 로그
+.playwright-mcp/
+
+# 테스트/빌드 아티팩트
+output/
+*.log
+debug.log
+*.png
+verify_temp.mjs
+
+# 원본·처리 데이터 (scripts/로 재생성 가능)
+data/
+
+# 외부 참조 자료
+.reference/
+
+docs/
