@@ -24,8 +24,8 @@ debug.log
 *.png
 verify_temp.mjs
 
-# 원본·처리 데이터 (scripts/로 재생성 가능)
-data/
+# 원본·처리 데이터 (scripts/로 재생성 가능) — /data/는 루트만, src/data/는 제외
+/data/
 
 # 외부 참조 자료
 .reference/
