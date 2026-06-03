@@ -7,7 +7,7 @@ AI 채팅·퀴즈·하이라이트·학습 분석까지 한 화면에서 제공�
 
 ## 배포 URL
 
-**→ [https://edu-contest.vercel.app](https://edu-contest.vercel.app)**
+**→ [https://edu-contest-flax.vercel.app/library](https://edu-contest-flax.vercel.app/library)**
 
 ---
 
