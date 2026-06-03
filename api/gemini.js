@@ -1,4 +1,4 @@
-const DEFAULT_MODEL = 'gemini-2.0-flash'
+const DEFAULT_MODEL = 'gemini-2.5-flash-lite'
 
 function readGeminiText(data) {
   return data?.candidates?.[0]?.content?.parts?.map((part) => part.text).join('').trim() || ''
@@ -15,7 +15,8 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: '서버에 Gemini API 키가 설정되지 않았습니다.' })
   }
 
-  const { prompt, json = false, model = DEFAULT_MODEL } = req.body || {}
+  const { prompt, json = false, model: requestedModel } = req.body || {}
+  const model = process.env.GEMINI_MODEL || requestedModel || DEFAULT_MODEL
   if (!prompt || typeof prompt !== 'string') {
     return res.status(400).json({ error: 'prompt가 필요합니다.' })
   }

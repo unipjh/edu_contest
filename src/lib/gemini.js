@@ -2,7 +2,7 @@ import { getEdunetUrl, getStandardByCode } from './ncicMapper.js'
 
 const DEV_GEMINI_API_KEY = import.meta.env.DEV ? import.meta.env.VITE_GEMINI_API_KEY : ''
 const GEMINI_PROXY_URL = import.meta.env.VITE_GEMINI_PROXY_URL || '/api/gemini'
-const MODEL = 'gemini-2.0-flash'
+const MODEL = import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.5-flash-lite'
 
 async function callGemini(prompt, { json = false } = {}) {
   const controller = new AbortController()
