@@ -29,13 +29,16 @@ export function useDocumentUpload(uid) {
       let standards = []
       let standardTargets = []
       let learningGoals = []
+      let mappingInput = previewText
       try {
         const keywords = await extractKeywordsFromPDF(previewText)
-        standards = findStandards(keywords)
-        standardTargets = findLearningTargets([...keywords, previewText], standards)
+        mappingInput = keywords.length ? [...keywords, previewText] : previewText
       } catch (mappingError) {
         console.warn(mappingError)
       }
+
+      standards = findStandards(mappingInput)
+      standardTargets = findLearningTargets(mappingInput, standards)
 
       try {
         learningGoals = await generateLearningGoals(pageTexts[0] || previewText, standards, standardTargets)

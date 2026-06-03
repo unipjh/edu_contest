@@ -1,34 +1,54 @@
 import { getEdunetUrl, getStandardByCode } from './ncicMapper.js'
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
+const DEV_GEMINI_API_KEY = import.meta.env.DEV ? import.meta.env.VITE_GEMINI_API_KEY : ''
+const GEMINI_PROXY_URL = import.meta.env.VITE_GEMINI_PROXY_URL || '/api/gemini'
 const MODEL = 'gemini-2.0-flash'
 
 async function callGemini(prompt, { json = false } = {}) {
-  if (!GEMINI_API_KEY) {
-    throw new Error('Gemini API 키가 설정되지 않았습니다.')
-  }
-
   const controller = new AbortController()
   const timeoutId = globalThis.setTimeout(() => controller.abort(), 30000)
 
+  const requestBody = {
+    prompt,
+    json,
+    model: MODEL,
+  }
+
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      signal: controller.signal,
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: json ? { responseMimeType: 'application/json' } : undefined,
-      }),
-    },
+    DEV_GEMINI_API_KEY
+      ? `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${DEV_GEMINI_API_KEY}`
+      : GEMINI_PROXY_URL,
+    DEV_GEMINI_API_KEY
+      ? {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: json ? { responseMimeType: 'application/json' } : undefined,
+          }),
+        }
+      : {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify(requestBody),
+        },
   ).finally(() => globalThis.clearTimeout(timeoutId))
 
   if (!response.ok) {
-    throw new Error(`Gemini 요청 실패: ${response.status}`)
+    let message = `Gemini 요청 실패: ${response.status}`
+    try {
+      const errorData = await response.json()
+      message = errorData?.error || message
+    } catch {
+      // Keep the status-only message when the server did not return JSON.
+    }
+    throw new Error(message)
   }
 
   const data = await response.json()
+  if (typeof data.text === 'string') return data.text.trim()
   return data.candidates?.[0]?.content?.parts?.map((part) => part.text).join('').trim() || ''
 }
 

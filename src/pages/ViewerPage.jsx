@@ -6,6 +6,7 @@ import workerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 import { doc as firestoreDoc, updateDoc } from 'firebase/firestore'
 import { auth, db } from '../lib/firebase.js'
 import { generateLearningGoals, generateOxQuestion } from '../lib/gemini.js'
+import { findLearningTargets, findStandards, getSummary } from '../lib/ncicMapper.js'
 import { extractSelection } from '../lib/selectionUtils.js'
 import { useDocument } from '../hooks/useDocument.js'
 import { useDocumentStore } from '../store/documentStore.js'
@@ -62,8 +63,26 @@ export default function ViewerPage() {
 
   const pageTexts = documentData?.pageTexts || []
   const currentPageText = pageTexts[currentPage - 1] || ''
-  const standards = documentData?.standards || []
-  const standardTargets = documentData?.standardTargets || []
+  const savedStandards = documentData?.standards || []
+  const savedStandardTargets = documentData?.standardTargets || []
+  const fallbackMapping = useMemo(() => {
+    if (savedStandards.length) {
+      return { standards: savedStandards, standardTargets: savedStandardTargets }
+    }
+
+    const previewText = pageTexts.slice(0, 5).join('\n').slice(0, 4000)
+    if (!previewText.trim()) {
+      return { standards: [], standardTargets: [] }
+    }
+
+    const mappedStandards = findStandards(previewText)
+    return {
+      standards: mappedStandards,
+      standardTargets: findLearningTargets(previewText, mappedStandards),
+    }
+  }, [pageTexts, savedStandardTargets, savedStandards])
+  const standards = fallbackMapping.standards
+  const standardTargets = fallbackMapping.standardTargets
   const standardCode = standards[0] || 'unknown'
   const goals = documentData?.learningGoals || []
   const goalStorageKey = docId ? `costudy:goals:${docId}` : ''
@@ -109,6 +128,19 @@ export default function ViewerPage() {
   useEffect(() => {
     localStorage.setItem('costudy:gate', String(gateEnabled))
   }, [gateEnabled])
+
+  useEffect(() => {
+    if (!documentData || savedStandards.length || !standards.length || !docId) return
+
+    const summary = getSummary(standards)
+    updateDoc(firestoreDoc(db, 'documents', docId), {
+      standards,
+      standardTargets,
+      subject: summary.subject,
+      grade: summary.grade,
+      unit: summary.unit,
+    }).catch((mappingError) => console.warn(mappingError))
+  }, [docId, documentData, savedStandards.length, standardTargets, standards])
 
   useEffect(() => {
     setPendingSelection(null)
@@ -277,7 +309,7 @@ export default function ViewerPage() {
           </button>
         </div>
         <div className="viewerMetaControls">
-          <StandardsBadge documentData={documentData} onOpenPublicData={() => setPublicDataOpen(true)} />
+          <StandardsBadge documentData={documentData} standards={standards} onOpenPublicData={() => setPublicDataOpen(true)} />
           <button className={gateEnabled ? 'togglePill active' : 'togglePill'} onClick={() => setGateEnabled(!gateEnabled)}>
             잠금 {gateEnabled ? 'ON' : 'OFF'}
           </button>

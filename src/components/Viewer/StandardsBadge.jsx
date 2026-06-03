@@ -1,8 +1,8 @@
 import { Database } from 'lucide-react'
 
-export default function StandardsBadge({ documentData, onOpenPublicData }) {
-  const standards = documentData?.standards || []
-  const disabled = !standards.length || documentData?.subject === '분석 중'
+export default function StandardsBadge({ documentData, standards: mappedStandards, onOpenPublicData }) {
+  const standards = mappedStandards || documentData?.standards || []
+  const disabled = !standards.length
 
   return (
     <button
